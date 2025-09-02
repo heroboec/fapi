@@ -38,6 +38,49 @@ async def create_hotel(
     return {'status': 'ok', 'id': hotels_data[-1]['id']}
 
 
+@app.patch('/hotels/{hotel_id: int}')
+async def edit_hotel(
+    hotel_id: int = Query(description='Идентификатор отеля'),
+    title: str | None = Body(embed=True, default=None),
+    name: str | None = Body(embed=True, default=None)
+):
+    global hotels_data
+    current_hotel = list(filter(lambda hotel: hotel_id == hotel['id'], hotels_data))
+
+    if not current_hotel:
+        return {'status': 'error'}
+
+    current_hotel = current_hotel[0]
+
+    if title:
+        current_hotel['title'] = title
+
+    if name:
+        current_hotel['name'] = name
+
+    return {'status': 'ok', 'id': hotel_id}
+
+
+@app.put('/hotels/{hotel_id: int}')
+async def update_hotel(
+    hotel_id: int = Query(description='Идентификатор отеля'),
+    title: str = Body(embed=True),
+    name: str = Body(embed=True),
+):
+    global hotels_data
+    current_hotel = list(filter(lambda hotel: hotel_id == hotel['id'], hotels_data))
+
+    if not current_hotel:
+        return {'status': 'error'}
+
+    current_hotel = current_hotel[0]
+
+    current_hotel['title'] = title
+    current_hotel['name'] = name
+
+    return {'status': 'ok', 'id': hotel_id}
+
+
 @app.delete('/hotels/{hotel_id: int}')
 async def delete_hotel(hotel_id: int):
     global hotels_data
