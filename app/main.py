@@ -81,7 +81,7 @@ async def update_hotel(
     return {'status': 'ok', 'id': hotel_id}
 
 
-@app.delete('/hotels/{hotel_id: int}')
+@app.delete('/hotels/{hotel_id}')
 async def delete_hotel(hotel_id: int):
     global hotels_data
     d = hotels_data
