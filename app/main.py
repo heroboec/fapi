@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Body
+from fastapi import FastAPI, Query, Body, Path
 import uvicorn
 
 app = FastAPI()
@@ -38,9 +38,9 @@ async def create_hotel(
     return {'status': 'ok', 'id': hotels_data[-1]['id']}
 
 
-@app.patch('/hotels/{hotel_id: int}')
+@app.patch('/hotels/{hotel_id}')
 async def edit_hotel(
-    hotel_id: int = Query(description='Идентификатор отеля'),
+    hotel_id: int = Path(description='Идентификатор отеля'),
     title: str | None = Body(embed=True, default=None),
     name: str | None = Body(embed=True, default=None)
 ):
@@ -61,9 +61,9 @@ async def edit_hotel(
     return {'status': 'ok', 'id': hotel_id}
 
 
-@app.put('/hotels/{hotel_id: int}')
+@app.put('/hotels/{hotel_id}')
 async def update_hotel(
-    hotel_id: int = Query(description='Идентификатор отеля'),
+    hotel_id: int = Path(description='Идентификатор отеля'),
     title: str = Body(embed=True),
     name: str = Body(embed=True),
 ):
