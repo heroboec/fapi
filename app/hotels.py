@@ -19,11 +19,12 @@ hotels_data = [
 async def hotels(
     identifier: int | None = Query(description='Идентификатор отеля', default=None, gt=0),
     title: str | None = Query(description='Названия отеля', default=None),
-    page: int = Query(description='Номер страницы', default=1, gt=0),
-    per_page: int = Query(description='Количество отелей на странице', default=3),
+    page: int | None = Query(description='Номер страницы', default=1, gt=0),
+    per_page: int | None = Query(description='Количество отелей на странице', default=3, gt=0, le=100),
 ) -> list[dict]:
     hotels_ = []
     global hotels_data
+
     start = (page - 1) * per_page
     stop = page * per_page
 
