@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  local-backend-fastapi--postrges:
+    image: postgres:13-alpine
+    container_name: local-backend-fastapi--postrges
+    volumes:
+      - postgres_data_fastapi_course:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    env_file:
+      .env
+
+#  local-backend--redis:
+#    image: redis:6-alpine
+#    container_name: local-backend--redis
+#    expose:
+#      - 6379
+#    restart: unless-stopped
+
+volumes:
+  postgres_data_fastapi_course:
+    name: local-backend--postgres_data_for_fastapi_course
