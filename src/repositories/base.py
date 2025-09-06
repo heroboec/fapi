@@ -17,8 +17,8 @@ class BaseRepository:
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_one_or_none(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
+    async def get_one(self, **filters):
+        query = select(self.model).filter_by(**filters)
         result = await self.session.execute(query)
         return result.scalars().one_or_none()
 
@@ -35,25 +35,18 @@ class BaseRepository:
         :param filters: фильтры
         :return: None
         """
-        upd_stmt = update(self.model).filter_by(**filters).values(**data.model_dump())
-        await self.session.execute(upd_stmt)
+        edit_stmt = update(self.model).filter_by(**filters).values(**data.model_dump())
+        await self.session.execute(edit_stmt)
 
-    async def update(self, data: BaseModel, **filters):
+    async def update(self, data: BaseModel, exclude_unset: bool, **filters):
         """
         Заменяет некоторые поля в базе по фильтрам.
         :param data: данные для замены
         :param filters: фильтры
         :return: None
         """
-        # replace_stmt = update(self.model)
-        # for key, value in filters.items():
-        #     if value is not None:
-        #         replace_stmt = replace_stmt.filter(func.lower(getattr(self.model, key)).contains(value.lower()))
-        #
-        # replace_stmt = replace_stmt.values(
-        #     **{key: value for key, value in data.model_dump().items() if value is not None}
-        # )
-        # await self.session.execute(replace_stmt)
+        upd_stmt = update(self.model).filter_by(**filters).values(**data.model_dump(exclude_unset=exclude_unset))
+        await self.session.execute(upd_stmt)
 
     async def delete(self, **filters):
         del_stmt = delete(self.model).filter_by(**filters)

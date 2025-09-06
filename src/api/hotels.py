@@ -24,6 +24,16 @@ async def hotels(
         )
 
 
+@router.get('/{hotel_id}', summary='Получение данных об отеле по id')
+async def get_hotel(
+    hotel_id: int,
+):
+    async with async_session_maker() as session:
+        result = await HotelsRepository(session).get_one(id=hotel_id)
+
+    return {'status': 'ok', 'data': result}
+
+
 @router.post('/', summary='Добавление нового отеля')
 async def create_hotel(
     data: Hotel = Body(
@@ -39,16 +49,15 @@ async def create_hotel(
 
 
 @router.patch('/{hotel_id}', summary='Редактирование отеля')
-async def edit_hotel(
+async def update_hotel(
     data: HotelPatch,
-    location: str | None = Query(description='Адрес отеля', default=None),
-    title: str | None = Query(description='Названия отеля', default=None),
+    hotel_id: int,
 ):
     async with async_session_maker() as session:
         await HotelsRepository(session=session).update(
-            data_model=data,
-            location=location,
-            title=title,
+            data=data,
+            id=hotel_id,
+            exclude_unset=True,
         )
         await session.commit()
 
@@ -56,7 +65,7 @@ async def edit_hotel(
 
 
 @router.put('/{hotel_id}', summary='Обновление отеля')
-async def update_hotel(
+async def edit_hotel(
     hotel_id: int,
     data: Hotel,
 ):
