@@ -29,7 +29,7 @@ async def get_hotel(
     hotel_id: int,
 ):
     async with async_session_maker() as session:
-        result = await HotelsRepository(session).get_one(id=hotel_id)
+        result = await HotelsRepository(session).get_one_or_none(id=hotel_id)
 
     return {'status': 'ok', 'data': result}
 

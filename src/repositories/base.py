@@ -17,8 +17,8 @@ class BaseRepository:
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_one(self, **filters):
-        query = select(self.model).filter_by(**filters)
+    async def get_one_or_none(self, **filters):
+        query = select(self.model).one_or_none(**filters)
         result = await self.session.execute(query)
         return result.scalars().one_or_none()
 
