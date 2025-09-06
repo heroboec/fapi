@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 from sqlalchemy import select, insert, delete, func, update
 
+from src.schemas.hotels import Hotel
+
 
 class BaseRepository:
     model = None
+    schema: BaseModel = Hotel
 
     def __init__(self, session):
         self.session = session
@@ -15,18 +18,23 @@ class BaseRepository:
     async def get_all(self, *args, **kwargs):
         query = select(self.model)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return [self.schema.model_validate(item, from_attributes=True) for item in result.scalars()]
 
     async def get_one_or_none(self, **filters):
         query = select(self.model).one_or_none(**filters)
         result = await self.session.execute(query)
-        return result.scalars().one_or_none()
+        res = result.scalars().one_or_none()
+        if not res:
+            return res
+
+        return self.schema.model_validate(res, from_attributes=True)
 
     async def add(self, data: BaseModel):
         add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result = await self.session.execute(add_stmt)
 
-        return result.scalars().one()
+        res = result.scalars().one()
+        return self.schema.model_validate(res, from_attributes=True)
 
     async def edit(self, data: BaseModel, **filters):
         """
