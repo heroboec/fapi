@@ -1,10 +1,8 @@
 from fastapi import Query, APIRouter, Body
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
-from src.models.hotels import HotelsOrm
 from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import HotelPatch, Hotel
-from sqlalchemy import insert, select, func
 
 router = APIRouter(prefix='/hotels', tags=["Отели"])
 
@@ -28,64 +26,56 @@ async def hotels(
 
 @router.post('/', summary='Добавление нового отеля')
 async def create_hotel(
-    hotel_data: Hotel = Body(
+    data: Hotel = Body(
         openapi_examples={
             '1': {'summary': 'Сочи', 'value': {'title': 'sochi', 'location': 'sochi hotel and spa resort'}}
         }
 )):
     async with async_session_maker() as session:
-        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
-        # print(add_hotel_stmt.compile(engine, compile_kwargs={'literal_binds': True}))
-        await session.execute(add_hotel_stmt)
+        hotel = await HotelsRepository(session=session).add(data)
+        await session.commit()
+
+    return {'status': 'ok', 'data': hotel}
+
+
+@router.patch('/{hotel_id}', summary='Редактирование отеля')
+async def edit_hotel(
+    data: HotelPatch,
+    location: str | None = Query(description='Адрес отеля', default=None),
+    title: str | None = Query(description='Названия отеля', default=None),
+):
+    async with async_session_maker() as session:
+        await HotelsRepository(session=session).update(
+            data_model=data,
+            location=location,
+            title=title,
+        )
         await session.commit()
 
     return {'status': 'ok'}
 
 
-@router.patch('/{hotel_id}', summary='Редактирование отеля')
-async def edit_hotel(
-    hotel_id: int,
-    hotel_data: HotelPatch,
-):
-    global hotels_data
-    current_hotel = list(filter(lambda hotel: hotel_id == hotel['id'], hotels_data))
-
-    if not current_hotel:
-        return {'status': 'error'}
-
-    current_hotel = current_hotel[0]
-
-    if hotel_data.title:
-        current_hotel['title'] = hotel_data.title
-
-    if hotel_data.location:
-        current_hotel['location'] = hotel_data.location
-
-    return {'status': 'ok', 'id': hotel_id}
-
-
 @router.put('/{hotel_id}', summary='Обновление отеля')
 async def update_hotel(
     hotel_id: int,
-    hotel_data: Hotel,
+    data: Hotel,
 ):
-    global hotels_data
-    current_hotel = list(filter(lambda hotel: hotel_id == hotel['id'], hotels_data))
+    async with async_session_maker() as session:
+        await HotelsRepository(session=session).edit(
+            data=data,
+            id=hotel_id
+        )
+        await session.commit()
 
-    if not current_hotel:
-        return {'status': 'error'}
-
-    current_hotel = current_hotel[0]
-
-    current_hotel['title'] = hotel_data.title
-    current_hotel['location'] = hotel_data.location
-
-    return {'status': 'ok', 'id': hotel_id}
+    return {'status': 'ok'}
 
 
-@router.delete('/{hotel_id}', summary='Удаление отеля')
-async def delete_hotel(hotel_id: int):
-    global hotels_data
-    d = hotels_data
-    hotels_data = [hotel for hotel in d if hotel['id'] != hotel_id]
+@router.delete('/{hotel_id}', summary='Удаление отелей')
+async def delete_hotels(
+    hotel_id: int,
+):
+    async with async_session_maker() as session:
+        await HotelsRepository(session=session).delete(id=hotel_id)
+        await session.commit()
+
     return {'status': 'ok'}
