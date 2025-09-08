@@ -28,6 +28,12 @@ async def login_user(
     return {'status': 'ok', 'access_token': token}
 
 
+@router.post('/logout')
+async def logout_user(response: Response):
+    response.delete_cookie('access_token')
+    return {'status': 'ok'}
+
+
 @router.post('/register')
 async def register_user(data: UserRequestAdd):
     hashed_password = AuthService().hash_password(data.password)
