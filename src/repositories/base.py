@@ -21,7 +21,7 @@ class BaseRepository:
         return [self.schema.model_validate(item, from_attributes=True) for item in result.scalars()]
 
     async def get_one_or_none(self, **filters):
-        query = select(self.model).one_or_none(**filters)
+        query = select(self.model).filter_by(**filters)
         result = await self.session.execute(query)
         res = result.scalars().one_or_none()
         if not res:
