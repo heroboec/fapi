@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from typing import Annotated
 from fastapi import Request, HTTPException
 
-from src.repositories.users import UsersRepository
 from src.services.auth_service import AuthService
 
 

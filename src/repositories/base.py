@@ -15,10 +15,13 @@ class BaseRepository:
         # self.session.close()
         pass
 
-    async def get_all(self, *args, **kwargs):
-        query = select(self.model)
+    async def get_filtered(self, **filters):
+        query = select(self.model).filter_by(**filters)
         result = await self.session.execute(query)
         return [self.schema.model_validate(item, from_attributes=True) for item in result.scalars()]
+
+    async def get_all(self, *args, **kwargs):
+        return await self.get_filtered()
 
     async def get_one_or_none(self, **filters):
         query = select(self.model).filter_by(**filters)
