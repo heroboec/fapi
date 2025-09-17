@@ -6,6 +6,16 @@ from src.schemas.rooms import Room
 router = APIRouter(prefix='/bookings', tags=["Бронирования"])
 
 
+@router.get('/', summary='Получение всех бронирований')
+async def get_bookings(db: DBDep):
+    return await db.bookings.get_all()
+
+
+@router.get('/me', summary='Получение бронирований аутентифицированного пользователя')
+async def get_my_bookings(db: DBDep, user_id: UserIdDep):
+    return await db.bookings.get_filtered(user_id=user_id)
+
+
 @router.post('/', summary='Добавление нового бронирования')
 async def create_hotel(
     db: DBDep,
