@@ -6,7 +6,7 @@ from src.schemas.hotels import Hotel
 
 class BaseRepository:
     model = None
-    schema: BaseModel = Hotel
+    schema: BaseModel
 
     def __init__(self, session):
         self.session = session
