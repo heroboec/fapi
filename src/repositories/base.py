@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from sqlalchemy import select, insert, delete, func, update
+from sqlalchemy import select, insert, delete, update
 
 from src.schemas.hotels import Hotel
 
@@ -15,8 +15,14 @@ class BaseRepository:
         # self.session.close()
         pass
 
-    async def get_filtered(self, **filters):
-        query = select(self.model).filter_by(**filters)
+    async def get_filtered(self, *filters, **filters_by):
+        query = select(
+            self.model,
+        ).filter(
+            *filters,
+        ).filter_by(
+            **filters_by,
+        )
         result = await self.session.execute(query)
         return [self.schema.model_validate(item, from_attributes=True) for item in result.scalars()]
 
